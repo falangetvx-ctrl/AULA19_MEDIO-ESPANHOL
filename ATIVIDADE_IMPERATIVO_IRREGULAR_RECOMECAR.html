@@ -1,0 +1,1121 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#111111">
+  <title>El Imperativo — Regulares e Irregulares</title>
+  <style>
+    :root {
+      --black: #111111;
+      --ink: #242424;
+      --muted: #676767;
+      --paper: #ffffff;
+      --background: #f4f0e8;
+      --blue: #2b90ca;
+      --green: #39a85a;
+      --orange: #f2a33a;
+      --red: #df3d4d;
+      --violet: #7c4dcc;
+      --yellow: #ffd84a;
+      --line: #dedbd4;
+      --shadow: 0 22px 55px rgba(29, 25, 18, .18);
+    }
+
+    * { box-sizing: border-box; }
+    html { min-height: 100%; }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      font-family: "Segoe UI", Arial, sans-serif;
+      background:
+        radial-gradient(circle at 10% 15%, rgba(43,144,202,.14), transparent 22rem),
+        radial-gradient(circle at 90% 80%, rgba(242,163,58,.18), transparent 24rem),
+        var(--background);
+    }
+
+    button, input { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; }
+
+    .app {
+      width: min(1120px, calc(100% - 24px));
+      margin: 0 auto;
+      padding: 18px 0 30px;
+    }
+
+    .paper {
+      border: 3px solid var(--black);
+      border-radius: 4px;
+      background: var(--paper);
+      box-shadow: var(--shadow);
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      margin-bottom: 14px;
+      padding: 11px 15px;
+      border: 2px solid var(--black);
+      background: white;
+      box-shadow: 5px 5px 0 var(--black);
+    }
+
+    .mini-brand {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+      gap: 10px;
+    }
+
+    .brand-mark {
+      display: grid;
+      flex: 0 0 43px;
+      width: 43px;
+      height: 43px;
+      place-items: center;
+      color: white;
+      font-size: 1.3rem;
+      font-weight: 1000;
+      border-radius: 50%;
+      background: var(--black);
+    }
+
+    .mini-brand strong {
+      display: block;
+      overflow: hidden;
+      font-family: Impact, "Arial Narrow", sans-serif;
+      font-size: 1.16rem;
+      font-weight: 900;
+      letter-spacing: .055em;
+      text-overflow: ellipsis;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .mini-brand small { color: var(--muted); font-weight: 700; }
+
+    .top-actions { display: flex; gap: 7px; }
+
+    .icon-btn {
+      width: 42px;
+      height: 42px;
+      color: var(--black);
+      font-size: 1.12rem;
+      font-weight: 900;
+      cursor: pointer;
+      border: 2px solid var(--black);
+      border-radius: 50%;
+      background: white;
+      transition: transform .16s, background .16s, color .16s;
+    }
+
+    .icon-btn:hover { color: white; background: var(--black); transform: translateY(-2px); }
+
+    .screen { display: none; }
+    .screen.active { display: block; animation: enter .36s ease both; }
+
+    .intro {
+      width: min(800px, 100%);
+      margin: 25px auto 0;
+      padding: clamp(25px, 5vw, 52px);
+      text-align: center;
+    }
+
+    .title {
+      margin: 0;
+      color: var(--black);
+      font-family: Impact, "Arial Narrow", sans-serif;
+      font-size: clamp(2.8rem, 10vw, 5.6rem);
+      font-weight: 900;
+      line-height: .95;
+      letter-spacing: .035em;
+      text-transform: uppercase;
+    }
+
+    .title-line {
+      width: min(410px, 75%);
+      height: 5px;
+      margin: 17px auto 25px;
+      background: var(--black);
+    }
+
+    .subtitle {
+      margin: 0 auto 20px;
+      color: var(--ink);
+      font-size: clamp(1.05rem, 3vw, 1.32rem);
+      line-height: 1.55;
+    }
+
+    .strict-rule {
+      max-width: 600px;
+      margin: 20px auto;
+      padding: 16px 18px;
+      color: #8d1f2b;
+      font-weight: 850;
+      line-height: 1.45;
+      border: 3px dashed var(--red);
+      border-radius: 15px;
+      background: #fff2f3;
+    }
+
+    .pronoun-strip {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+      max-width: 620px;
+      margin: 22px auto;
+    }
+
+    .pronoun-strip span {
+      padding: 11px 6px;
+      font-size: .9rem;
+      font-weight: 900;
+      border: 2px solid currentColor;
+      border-radius: 11px;
+      background: white;
+    }
+
+    .pronoun-strip span:nth-child(1) { color: var(--blue); }
+    .pronoun-strip span:nth-child(2) { color: var(--green); }
+    .pronoun-strip span:nth-child(3) { color: var(--red); }
+    .pronoun-strip span:nth-child(4) { color: var(--orange); }
+    .pronoun-strip span:nth-child(5) { color: var(--violet); }
+
+    .student-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      max-width: 610px;
+      margin: 24px auto 18px;
+      text-align: left;
+    }
+
+    .field label {
+      display: block;
+      margin: 0 0 6px;
+      color: var(--black);
+      font-size: .83rem;
+      font-weight: 900;
+      text-transform: uppercase;
+    }
+
+    .field input {
+      width: 100%;
+      height: 52px;
+      padding: 0 14px;
+      border: 2px solid var(--black);
+      border-radius: 8px;
+      outline: none;
+      background: #fffefb;
+    }
+
+    .field input:focus, .conjugation-input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 4px rgba(43,144,202,.16);
+    }
+
+    .btn {
+      min-height: 50px;
+      padding: 0 21px;
+      color: white;
+      font-weight: 900;
+      cursor: pointer;
+      border: 2px solid var(--black);
+      border-radius: 8px;
+      background: var(--black);
+      box-shadow: 4px 4px 0 #777;
+      transition: transform .14s, box-shadow .14s, filter .14s;
+    }
+
+    .btn:hover { filter: brightness(1.18); transform: translate(-1px, -1px); box-shadow: 6px 6px 0 #777; }
+    .btn:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 #777; }
+    .btn:focus-visible, .icon-btn:focus-visible, .accent-key:focus-visible { outline: 4px solid rgba(43,144,202,.3); outline-offset: 3px; }
+    .btn-green { background: var(--green); }
+    .btn-blue { background: var(--blue); }
+
+    .error-text { min-height: 20px; margin: 10px 0 0; color: var(--red); font-weight: 850; }
+
+    .game-header {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 13px;
+      margin-bottom: 14px;
+      padding: 13px 15px;
+      border: 2px solid var(--black);
+      background: white;
+      box-shadow: 5px 5px 0 var(--black);
+    }
+
+    .player-badge, .attempt-badge {
+      min-width: 0;
+      padding: 9px 12px;
+      font-weight: 900;
+      border: 2px solid var(--black);
+      border-radius: 999px;
+      background: #fffefb;
+    }
+
+    .player-badge { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .attempt-badge { color: #8d1f2b; background: #fff0f2; }
+
+    .progress-zone { min-width: 0; }
+    .progress-label { display: flex; justify-content: space-between; gap: 8px; margin-bottom: 6px; font-size: .74rem; font-weight: 900; text-transform: uppercase; }
+    .progress-track { height: 13px; overflow: hidden; border: 2px solid var(--black); border-radius: 999px; background: #efede8; }
+    .progress-bar { width: 0; height: 100%; background: linear-gradient(90deg, var(--blue), var(--green), var(--orange)); transition: width .45s ease; }
+
+    .route {
+      display: grid;
+      grid-template-columns: repeat(11, minmax(0, 1fr));
+      gap: 7px;
+      margin-bottom: 14px;
+      padding: 12px;
+      border: 2px solid var(--black);
+      background: white;
+    }
+
+    .route-step {
+      position: relative;
+      min-width: 0;
+      padding: 10px 3px;
+      overflow: hidden;
+      color: #777;
+      font-size: clamp(.56rem, 1.5vw, .73rem);
+      font-weight: 900;
+      text-align: center;
+      text-overflow: ellipsis;
+      border: 2px solid #cfcfcf;
+      border-radius: 8px;
+      background: #f4f4f4;
+    }
+
+    .route-step.active { color: white; border-color: var(--black); background: var(--black); transform: translateY(-3px); }
+    .route-step.done { color: #0d6d33; border-color: var(--green); background: #e9f8ee; }
+    .route-step.done::after { content: " ✓"; }
+
+    .game-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 290px;
+      gap: 15px;
+      align-items: start;
+    }
+
+    .exercise {
+      min-height: 570px;
+      padding: clamp(22px, 4vw, 40px);
+    }
+
+    .instruction {
+      margin: 0 0 8px;
+      color: var(--muted);
+      font-size: .86rem;
+      font-weight: 850;
+      letter-spacing: .04em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .verb-title {
+      margin: 0;
+      color: var(--black);
+      font-family: Impact, "Arial Narrow", sans-serif;
+      font-size: clamp(3rem, 10vw, 5.3rem);
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: .07em;
+      text-align: center;
+      text-transform: uppercase;
+    }
+
+    .irregular-mark {
+      width: fit-content;
+      margin: 10px auto 24px;
+      padding: 6px 12px;
+      color: #8d1f2b;
+      font-size: .75rem;
+      font-weight: 900;
+      border: 2px solid var(--red);
+      border-radius: 999px;
+      background: #fff0f2;
+      text-transform: uppercase;
+    }
+
+    .irregular-mark.regular {
+      color: #0d6d33;
+      border-color: var(--green);
+      background: #eaf9ef;
+    }
+
+    .conjugation-table {
+      display: grid;
+      gap: 10px;
+      max-width: 820px;
+      margin: 0 auto;
+    }
+
+    .conjugation-head {
+      display: grid;
+      grid-template-columns: 145px repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      align-items: end;
+    }
+
+    .conjugation-head strong {
+      padding: 8px 4px;
+      font-size: .76rem;
+      letter-spacing: .04em;
+      text-align: center;
+      border-bottom: 3px solid currentColor;
+    }
+
+    .conjugation-head strong:nth-child(2) { color: var(--green); }
+    .conjugation-head strong:nth-child(3) { color: var(--red); }
+
+    .conjugation-row {
+      display: grid;
+      grid-template-columns: 145px repeat(2, minmax(0, 1fr));
+      align-items: center;
+      gap: 10px;
+    }
+
+    .pronoun {
+      padding: 12px 8px;
+      font-size: 1rem;
+      font-weight: 900;
+      text-align: right;
+    }
+
+    .tu-row .pronoun { color: var(--blue); }
+    .usted-row .pronoun { color: var(--green); }
+    .nosotros-row .pronoun { color: var(--red); }
+    .vosotros-row .pronoun { color: var(--orange); }
+    .ustedes-row .pronoun { color: var(--violet); }
+
+    .conjugation-input {
+      width: 100%;
+      height: 51px;
+      padding: 0 14px;
+      color: var(--black);
+      font-size: 1.05rem;
+      font-weight: 850;
+      border: 2px solid #bdbdbd;
+      border-radius: 8px;
+      outline: none;
+      background: #fffefa;
+      transition: border-color .18s, background .18s, transform .18s;
+    }
+
+    .conjugation-input.correct { border-color: var(--green); background: #eaf9ef; }
+    .conjugation-input.wrong { border-color: var(--red); background: #fff0f2; animation: shake .35s; }
+    .negative-input { border-color: #e3a5ad; background: #fffafb; }
+    .negative-input:focus { border-color: var(--red); box-shadow: 0 0 0 4px rgba(223,61,77,.13); }
+
+    .accent-tools {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      margin: 15px 0;
+      color: var(--muted);
+      font-size: .78rem;
+      font-weight: 850;
+    }
+
+    .accent-key {
+      width: 36px;
+      height: 34px;
+      color: var(--black);
+      font-weight: 900;
+      cursor: pointer;
+      border: 2px solid var(--black);
+      border-radius: 7px;
+      background: white;
+    }
+
+    .accent-key:hover { color: white; background: var(--black); }
+
+    .exercise-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 13px; }
+
+    .feedback {
+      min-height: 55px;
+      max-width: 620px;
+      margin: 16px auto 0;
+      padding: 13px 15px;
+      line-height: 1.4;
+      text-align: center;
+      border: 2px solid transparent;
+      border-radius: 10px;
+      opacity: 0;
+    }
+
+    .feedback.show { opacity: 1; }
+    .feedback.success { color: #0c6930; border-color: var(--green); background: #eaf9ef; }
+    .feedback.notice { color: #775316; border-color: var(--orange); background: #fff7e8; }
+
+    .support { position: sticky; top: 14px; padding: 20px; }
+    .support h3 { margin: 0 0 14px; font-family: Impact, "Arial Narrow", sans-serif; font-size: 1.45rem; letter-spacing: .05em; text-align: center; text-transform: uppercase; }
+
+    .support-item {
+      margin-top: 10px;
+      padding: 12px;
+      border: 2px solid var(--line);
+      border-radius: 9px;
+      background: #fffefa;
+    }
+
+    .support-item strong { display: block; margin-bottom: 4px; font-size: .78rem; text-transform: uppercase; }
+    .support-item p { margin: 0; color: var(--muted); font-size: .82rem; line-height: 1.45; }
+
+    .memory {
+      margin-top: 14px;
+      padding: 13px 9px;
+      color: white;
+      font-size: .98rem;
+      font-weight: 1000;
+      line-height: 1.5;
+      text-align: center;
+      border-radius: 8px;
+      background: var(--black);
+      letter-spacing: .04em;
+    }
+
+    .warning-small { margin: 13px 0 0; color: var(--red); font-size: .76rem; font-weight: 850; line-height: 1.4; text-align: center; }
+
+    .failure-overlay {
+      position: fixed;
+      z-index: 100;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: rgba(17,17,17,.78);
+      backdrop-filter: blur(6px);
+    }
+
+    .failure-overlay.show { display: flex; }
+
+    .failure-card {
+      width: min(530px, 100%);
+      padding: clamp(26px, 6vw, 45px);
+      text-align: center;
+      border-color: var(--red);
+      animation: pop .3s ease both;
+    }
+
+    .failure-icon {
+      display: grid;
+      width: 90px;
+      height: 90px;
+      margin: 0 auto 17px;
+      place-items: center;
+      color: white;
+      font-size: 2.7rem;
+      font-weight: 1000;
+      border-radius: 50%;
+      background: var(--red);
+    }
+
+    .failure-card h2 { margin: 0 0 10px; color: var(--red); font-family: Impact, "Arial Narrow", sans-serif; font-size: 2.2rem; letter-spacing: .05em; text-transform: uppercase; }
+    .failure-card p { color: var(--muted); line-height: 1.55; }
+    .countdown { margin: 17px 0 0; color: var(--black); font-size: 1.08rem; font-weight: 900; }
+
+    .result {
+      width: min(780px, 100%);
+      margin: 25px auto 0;
+      padding: clamp(27px, 6vw, 55px);
+      text-align: center;
+    }
+
+    .trophy {
+      display: grid;
+      width: 105px;
+      height: 105px;
+      margin: 0 auto 20px;
+      place-items: center;
+      font-size: 3.5rem;
+      border: 3px solid var(--black);
+      border-radius: 50%;
+      background: var(--yellow);
+      box-shadow: 7px 7px 0 var(--black);
+    }
+
+    .result h2 { margin: 0; font-family: Impact, "Arial Narrow", sans-serif; font-size: clamp(2.4rem, 8vw, 4.7rem); letter-spacing: .04em; text-transform: uppercase; }
+    .result .lead { max-width: 570px; margin: 15px auto 22px; color: var(--muted); font-size: 1.08rem; line-height: 1.6; }
+
+    .result-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; max-width: 610px; margin: 22px auto; }
+    .result-stat { padding: 16px 8px; border: 2px solid var(--black); border-radius: 9px; background: #fffefa; }
+    .result-stat strong { display: block; color: var(--blue); font-size: 1.45rem; }
+    .result-stat span { color: var(--muted); font-size: .74rem; font-weight: 900; text-transform: uppercase; }
+    .result-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+
+    .confetti { position: fixed; z-index: 120; top: -20px; width: 11px; height: 17px; pointer-events: none; animation: fall var(--time) linear forwards; }
+
+    @keyframes enter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+    @keyframes pop { from { opacity: 0; transform: scale(.88); } to { opacity: 1; transform: scale(1); } }
+    @keyframes shake { 25% { transform: translateX(-7px); } 50% { transform: translateX(7px); } 75% { transform: translateX(-4px); } }
+    @keyframes fall { to { transform: translate3d(var(--drift), 110vh, 0) rotate(900deg); opacity: .75; } }
+
+    @media (max-width: 820px) {
+      .game-grid { grid-template-columns: 1fr; }
+      .route { grid-template-columns: repeat(6, 1fr); }
+      .support { position: static; display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+      .support h3, .memory, .warning-small { grid-column: 1 / -1; }
+      .support-item { margin: 0; }
+    }
+
+    @media (max-width: 620px) {
+      .app { width: calc(100% - 14px); padding-top: 8px; }
+      .mini-brand small { display: none; }
+      .student-form { grid-template-columns: 1fr; }
+      .pronoun-strip { grid-template-columns: 1fr 1fr; }
+      .game-header { grid-template-columns: 1fr auto; }
+      .progress-zone { grid-column: 1 / -1; grid-row: 2; }
+      .route { grid-template-columns: repeat(4, 1fr); }
+      .exercise { min-height: 615px; padding: 23px 14px; }
+      .conjugation-head, .conjugation-row { grid-template-columns: 88px repeat(2, minmax(0, 1fr)); gap: 6px; }
+      .conjugation-head strong { font-size: .63rem; }
+      .pronoun { padding-inline: 2px; font-size: .76rem; }
+      .conjugation-input { padding-inline: 7px; font-size: .88rem; }
+      .support { grid-template-columns: 1fr; }
+      .support h3, .memory, .warning-small { grid-column: auto; }
+      .result-stats { grid-template-columns: 1fr 1fr; }
+      .result-stat:last-child { grid-column: 1 / -1; }
+    }
+
+    @media print {
+      body { background: white; }
+      .topbar, #startScreen, #gameScreen, .result-actions { display: none !important; }
+      #resultScreen { display: block !important; margin: 0; box-shadow: none; }
+      .app { width: 100%; padding: 0; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topbar">
+      <div class="mini-brand">
+        <div class="brand-mark" aria-hidden="true">¡!</div>
+        <div>
+          <strong>El imperativo</strong>
+          <small>Desafio dos verbos regulares e irregulares</small>
+        </div>
+      </div>
+      <div class="top-actions">
+        <button class="icon-btn" id="soundButton" type="button" aria-label="Desativar som" title="Ativar ou desativar som">🔊</button>
+        <button class="icon-btn" id="restartButton" type="button" aria-label="Reiniciar atividade" title="Reiniciar atividade">↻</button>
+      </div>
+    </header>
+
+    <section class="screen active intro paper" id="startScreen">
+      <h1 class="title">El imperativo</h1>
+      <div class="title-line"></div>
+      <p class="subtitle">Conjugue corretamente os verbos regulares e irregulares no <strong>imperativo afirmativo e negativo</strong>.</p>
+
+      <div class="pronoun-strip" aria-label="Pessoas usadas na atividade">
+        <span>TÚ</span>
+        <span>USTED</span>
+        <span>NOSOTROS/AS</span>
+        <span>VOSOTROS/AS</span>
+        <span>USTEDES</span>
+      </div>
+
+      <div class="strict-rule">⚠️ REGRA DO DESAFIO: se uma única conjugação estiver errada, tudo será apagado e você voltará ao primeiro verbo.</div>
+
+      <div class="student-form">
+        <div class="field">
+          <label for="studentName">Nome do aluno</label>
+          <input id="studentName" type="text" maxlength="60" autocomplete="name" placeholder="Digite seu nome">
+        </div>
+        <div class="field">
+          <label for="studentClass">Turma</label>
+          <input id="studentClass" type="text" maxlength="30" placeholder="Ex.: 2º A">
+        </div>
+      </div>
+
+      <button class="btn" id="startButton" type="button">Começar o desafio</button>
+      <p class="error-text" id="startError" role="alert"></p>
+    </section>
+
+    <section class="screen" id="gameScreen">
+      <div class="game-header">
+        <div class="player-badge">👤 <span id="playerName">Aluno</span></div>
+        <div class="progress-zone">
+          <div class="progress-label"><span id="progressLabel">Verbo 1 de 8</span><span id="progressPercent">0%</span></div>
+          <div class="progress-track" role="progressbar" aria-label="Progresso" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <div class="progress-bar" id="progressBar"></div>
+          </div>
+        </div>
+        <div class="attempt-badge">Tentativa <span id="attemptNumber">1</span></div>
+      </div>
+
+      <nav class="route" id="route" aria-label="Sequência dos verbos"></nav>
+
+      <div class="game-grid">
+        <article class="exercise paper">
+          <p class="instruction">Complete as formas do imperativo afirmativo e negativo:</p>
+          <h2 class="verb-title" id="verbTitle">VENIR</h2>
+          <div class="irregular-mark" id="verbType">Verbo regular</div>
+
+          <div class="conjugation-table">
+            <div class="conjugation-head" aria-hidden="true">
+              <span></span>
+              <strong>AFIRMATIVO</strong>
+              <strong>NEGATIVO</strong>
+            </div>
+            <div class="conjugation-row tu-row">
+              <label class="pronoun" for="answerTu">(tú)</label>
+              <input class="conjugation-input" id="answerTu" data-key="tu" data-mode="affirmative" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Afirmativo">
+              <input class="conjugation-input negative-input" id="negativeTu" data-key="tu" data-mode="negative" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="no + verbo">
+            </div>
+            <div class="conjugation-row usted-row">
+              <label class="pronoun" for="answerUsted">(usted)</label>
+              <input class="conjugation-input" id="answerUsted" data-key="usted" data-mode="affirmative" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Afirmativo">
+              <input class="conjugation-input negative-input" id="negativeUsted" data-key="usted" data-mode="negative" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="no + verbo">
+            </div>
+            <div class="conjugation-row nosotros-row">
+              <label class="pronoun" for="answerNosotros">(nosotros/-as)</label>
+              <input class="conjugation-input" id="answerNosotros" data-key="nosotros" data-mode="affirmative" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Afirmativo">
+              <input class="conjugation-input negative-input" id="negativeNosotros" data-key="nosotros" data-mode="negative" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="no + verbo">
+            </div>
+            <div class="conjugation-row vosotros-row">
+              <label class="pronoun" for="answerVosotros">(vosotros/-as)</label>
+              <input class="conjugation-input" id="answerVosotros" data-key="vosotros" data-mode="affirmative" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Afirmativo">
+              <input class="conjugation-input negative-input" id="negativeVosotros" data-key="vosotros" data-mode="negative" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="no + verbo">
+            </div>
+            <div class="conjugation-row ustedes-row">
+              <label class="pronoun" for="answerUstedes">(ustedes)</label>
+              <input class="conjugation-input" id="answerUstedes" data-key="ustedes" data-mode="affirmative" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Afirmativo">
+              <input class="conjugation-input negative-input" id="negativeUstedes" data-key="ustedes" data-mode="negative" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="no + verbo">
+            </div>
+          </div>
+
+          <div class="accent-tools" aria-label="Teclas para acentuação">
+            <span>Acentos:</span>
+            <button class="accent-key" type="button" data-char="á">á</button>
+            <button class="accent-key" type="button" data-char="é">é</button>
+            <button class="accent-key" type="button" data-char="í">í</button>
+            <button class="accent-key" type="button" data-char="ó">ó</button>
+            <button class="accent-key" type="button" data-char="ú">ú</button>
+            <button class="accent-key" type="button" data-char="ñ">ñ</button>
+          </div>
+
+          <div class="exercise-actions">
+            <button class="btn btn-blue" id="checkButton" type="button">Verificar conjugação</button>
+            <button class="btn btn-green" id="nextButton" type="button" hidden>Próximo verbo →</button>
+          </div>
+          <div class="feedback" id="feedback" role="status" aria-live="assertive"></div>
+        </article>
+
+        <aside class="support paper">
+          <h3>Como formar?</h3>
+          <div class="support-item">
+            <strong style="color:var(--blue)">Tú</strong>
+            <p>Nos verbos regulares, usamos formas como habla, come e vive. Os irregulares possuem formas especiais.</p>
+          </div>
+          <div class="support-item">
+            <strong style="color:var(--green)">Usted / Nosotros / Ustedes</strong>
+            <p>Usamos as formas correspondentes do presente do subjuntivo.</p>
+          </div>
+          <div class="support-item">
+            <strong style="color:var(--orange)">Vosotros/as</strong>
+            <p>No afirmativo, retiramos o <b>r</b> do infinitivo e acrescentamos <b>d</b>.</p>
+          </div>
+          <div class="support-item">
+            <strong style="color:var(--red)">Imperativo negativo</strong>
+            <p>Em todas as pessoas, usamos <b>no + presente do subjuntivo</b>.</p>
+          </div>
+          <div class="memory"><small>IRREGULARES DE TÚ</small><br>VEN • DI • SAL • HAZ<br>TEN • VE • PON • SÉ</div>
+          <p class="warning-small">Uma resposta errada reinicia todo o percurso.</p>
+        </aside>
+      </div>
+    </section>
+
+    <section class="screen result paper" id="resultScreen">
+      <div class="trophy" aria-hidden="true">🏆</div>
+      <h2>¡Desafío superado!</h2>
+      <p class="lead">Você conjugou corretamente os verbos regulares e irregulares no imperativo afirmativo e negativo sem errar nenhuma forma no percurso final.</p>
+      <div class="result-stats">
+        <div class="result-stat"><strong>11</strong><span>Verbos dominados</span></div>
+        <div class="result-stat"><strong>110</strong><span>Formas corretas</span></div>
+        <div class="result-stat"><strong id="finalAttempts">1</strong><span>Tentativas</span></div>
+      </div>
+      <p id="resultIdentity" style="font-weight:900;"></p>
+      <div class="result-actions">
+        <button class="btn" id="playAgainButton" type="button">Jogar novamente</button>
+        <button class="btn btn-blue" id="printButton" type="button">Imprimir resultado</button>
+      </div>
+    </section>
+  </main>
+
+  <div class="failure-overlay" id="failureOverlay" role="dialog" aria-modal="true" aria-labelledby="failureTitle">
+    <div class="failure-card paper">
+      <div class="failure-icon" aria-hidden="true">×</div>
+      <h2 id="failureTitle">Uma forma está incorreta!</h2>
+      <p>Todos os campos serão apagados. Você voltará ao primeiro verbo e começará novamente.</p>
+      <div class="countdown">Reiniciando em <span id="countdown">3</span>…</div>
+    </div>
+  </div>
+
+  <script>
+    "use strict";
+
+    /* ================================================================
+       VERBOS REGULARES E IRREGULARES DO IMPERATIVO AFIRMATIVO E NEGATIVO
+       Os três primeiros representam as terminações -AR, -ER e -IR.
+       Os demais formam o recurso de memorização dos irregulares de tú:
+       VEN, DI, SAL, HAZ, TEN, VE, PON, SÉ.
+       ================================================================ */
+    const verbs = [
+      {
+        infinitive: "hablar", type: "regular",
+        affirmative: { tu: "habla", usted: "hable", nosotros: "hablemos", vosotros: "hablad", ustedes: "hablen" },
+        negative: { tu: "no hables", usted: "no hable", nosotros: "no hablemos", vosotros: "no habléis", ustedes: "no hablen" }
+      },
+      {
+        infinitive: "comer", type: "regular",
+        affirmative: { tu: "come", usted: "coma", nosotros: "comamos", vosotros: "comed", ustedes: "coman" },
+        negative: { tu: "no comas", usted: "no coma", nosotros: "no comamos", vosotros: "no comáis", ustedes: "no coman" }
+      },
+      {
+        infinitive: "vivir", type: "regular",
+        affirmative: { tu: "vive", usted: "viva", nosotros: "vivamos", vosotros: "vivid", ustedes: "vivan" },
+        negative: { tu: "no vivas", usted: "no viva", nosotros: "no vivamos", vosotros: "no viváis", ustedes: "no vivan" }
+      },
+      {
+        infinitive: "venir", type: "irregular",
+        affirmative: { tu: "ven", usted: "venga", nosotros: "vengamos", vosotros: "venid", ustedes: "vengan" },
+        negative: { tu: "no vengas", usted: "no venga", nosotros: "no vengamos", vosotros: "no vengáis", ustedes: "no vengan" }
+      },
+      {
+        infinitive: "decir", type: "irregular",
+        affirmative: { tu: "di", usted: "diga", nosotros: "digamos", vosotros: "decid", ustedes: "digan" },
+        negative: { tu: "no digas", usted: "no diga", nosotros: "no digamos", vosotros: "no digáis", ustedes: "no digan" }
+      },
+      {
+        infinitive: "salir", type: "irregular",
+        affirmative: { tu: "sal", usted: "salga", nosotros: "salgamos", vosotros: "salid", ustedes: "salgan" },
+        negative: { tu: "no salgas", usted: "no salga", nosotros: "no salgamos", vosotros: "no salgáis", ustedes: "no salgan" }
+      },
+      {
+        infinitive: "hacer", type: "irregular",
+        affirmative: { tu: "haz", usted: "haga", nosotros: "hagamos", vosotros: "haced", ustedes: "hagan" },
+        negative: { tu: "no hagas", usted: "no haga", nosotros: "no hagamos", vosotros: "no hagáis", ustedes: "no hagan" }
+      },
+      {
+        infinitive: "tener", type: "irregular",
+        affirmative: { tu: "ten", usted: "tenga", nosotros: "tengamos", vosotros: "tened", ustedes: "tengan" },
+        negative: { tu: "no tengas", usted: "no tenga", nosotros: "no tengamos", vosotros: "no tengáis", ustedes: "no tengan" }
+      },
+      {
+        infinitive: "ir", type: "irregular",
+        affirmative: { tu: "ve", usted: "vaya", nosotros: "vayamos", vosotros: "id", ustedes: "vayan" },
+        negative: { tu: "no vayas", usted: "no vaya", nosotros: "no vayamos", vosotros: "no vayáis", ustedes: "no vayan" }
+      },
+      {
+        infinitive: "poner", type: "irregular",
+        affirmative: { tu: "pon", usted: "ponga", nosotros: "pongamos", vosotros: "poned", ustedes: "pongan" },
+        negative: { tu: "no pongas", usted: "no ponga", nosotros: "no pongamos", vosotros: "no pongáis", ustedes: "no pongan" }
+      },
+      {
+        infinitive: "ser", type: "irregular",
+        affirmative: { tu: "sé", usted: "sea", nosotros: "seamos", vosotros: "sed", ustedes: "sean" },
+        negative: { tu: "no seas", usted: "no sea", nosotros: "no seamos", vosotros: "no seáis", ustedes: "no sean" }
+      }
+    ];
+
+    const state = {
+      current: 0,
+      attempts: 1,
+      student: "",
+      studentClass: "",
+      sound: true,
+      locked: false,
+      activeInput: null
+    };
+
+    const $ = selector => document.querySelector(selector);
+    const $$ = selector => [...document.querySelectorAll(selector)];
+
+    const elements = {
+      startScreen: $("#startScreen"),
+      gameScreen: $("#gameScreen"),
+      resultScreen: $("#resultScreen"),
+      studentName: $("#studentName"),
+      studentClass: $("#studentClass"),
+      startError: $("#startError"),
+      playerName: $("#playerName"),
+      verbTitle: $("#verbTitle"),
+      verbType: $("#verbType"),
+      progressLabel: $("#progressLabel"),
+      progressPercent: $("#progressPercent"),
+      progressBar: $("#progressBar"),
+      progressTrack: $(".progress-track"),
+      attemptNumber: $("#attemptNumber"),
+      route: $("#route"),
+      feedback: $("#feedback"),
+      checkButton: $("#checkButton"),
+      nextButton: $("#nextButton"),
+      failureOverlay: $("#failureOverlay"),
+      countdown: $("#countdown"),
+      soundButton: $("#soundButton")
+    };
+
+    const answerInputs = $$(".conjugation-input");
+
+    function normalize(value) {
+      return value
+        .toLocaleLowerCase("es")
+        .trim()
+        .replace(/[.,;:!?¡¿]+$/g, "")
+        .replace(/\s+/g, " ");
+    }
+
+    function renderRoute() {
+      elements.route.innerHTML = verbs.map((verb, index) => {
+        const status = index < state.current ? "done" : index === state.current ? "active" : "";
+        return `<div class="route-step ${status}">${index + 1}. ${verb.infinitive}</div>`;
+      }).join("");
+    }
+
+    function updateProgress() {
+      const completedPercent = Math.round((state.current / verbs.length) * 100);
+      elements.progressLabel.textContent = `Verbo ${state.current + 1} de ${verbs.length}`;
+      elements.progressPercent.textContent = `${completedPercent}%`;
+      elements.progressBar.style.width = `${completedPercent}%`;
+      elements.progressTrack.setAttribute("aria-valuenow", String(completedPercent));
+      elements.attemptNumber.textContent = state.attempts;
+    }
+
+    function clearInputs() {
+      answerInputs.forEach(input => {
+        input.value = "";
+        input.disabled = false;
+        input.classList.remove("correct", "wrong");
+      });
+      state.activeInput = answerInputs[0];
+    }
+
+    function renderVerb() {
+      const verb = verbs[state.current];
+      elements.verbTitle.textContent = verb.infinitive;
+      elements.verbType.textContent = `Verbo ${verb.type}`;
+      elements.verbType.classList.toggle("regular", verb.type === "regular");
+      elements.feedback.className = "feedback";
+      elements.feedback.textContent = "";
+      elements.checkButton.hidden = false;
+      elements.checkButton.disabled = false;
+      elements.nextButton.hidden = true;
+      clearInputs();
+      renderRoute();
+      updateProgress();
+      state.locked = false;
+      window.setTimeout(() => answerInputs[0].focus(), 100);
+    }
+
+    function startGame() {
+      const name = elements.studentName.value.trim();
+      if (name.length < 2) {
+        elements.startError.textContent = "Digite o nome do aluno para começar.";
+        elements.studentName.focus();
+        return;
+      }
+
+      state.current = 0;
+      state.attempts = 1;
+      state.student = name;
+      state.studentClass = elements.studentClass.value.trim();
+      elements.playerName.textContent = name.split(/\s+/)[0];
+      elements.startError.textContent = "";
+      elements.startScreen.classList.remove("active");
+      elements.resultScreen.classList.remove("active");
+      elements.gameScreen.classList.add("active");
+      renderVerb();
+      playSound("start");
+    }
+
+    function verifyConjugation() {
+      if (state.locked) return;
+      const empty = answerInputs.find(input => !input.value.trim());
+
+      if (empty) {
+        elements.feedback.className = "feedback notice show";
+        elements.feedback.textContent = "Complete as dez formas antes de verificar.";
+        empty.focus();
+        return;
+      }
+
+      const verb = verbs[state.current];
+      const wrongInputs = answerInputs.filter(input => {
+        const correctAnswer = verb[input.dataset.mode][input.dataset.key];
+        return normalize(input.value) !== correctAnswer;
+      });
+
+      if (wrongInputs.length > 0) {
+        wrongInputs.forEach(input => input.classList.add("wrong"));
+        state.locked = true;
+        playSound("error");
+        window.setTimeout(showFailureAndRestart, 350);
+        return;
+      }
+
+      state.locked = true;
+      answerInputs.forEach(input => {
+        input.classList.add("correct");
+        input.disabled = true;
+      });
+      elements.feedback.className = "feedback success show";
+      elements.feedback.innerHTML = "✓ <strong>¡Perfecto!</strong> As dez formas estão corretas.";
+      elements.checkButton.hidden = true;
+      elements.nextButton.hidden = false;
+      playSound("success");
+      elements.nextButton.focus();
+    }
+
+    function showFailureAndRestart() {
+      elements.failureOverlay.classList.add("show");
+      elements.countdown.textContent = "3";
+      let remaining = 3;
+      const timer = window.setInterval(() => {
+        remaining -= 1;
+        elements.countdown.textContent = String(Math.max(remaining, 0));
+        if (remaining <= 0) {
+          window.clearInterval(timer);
+          state.attempts += 1;
+          state.current = 0;
+          elements.failureOverlay.classList.remove("show");
+          renderVerb();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        }
+      }, 850);
+    }
+
+    function nextVerb() {
+      if (!state.locked) return;
+      state.current += 1;
+
+      if (state.current >= verbs.length) {
+        finishGame();
+      } else {
+        renderVerb();
+      }
+    }
+
+    function finishGame() {
+      elements.progressBar.style.width = "100%";
+      elements.gameScreen.classList.remove("active");
+      elements.resultScreen.classList.add("active");
+      $("#finalAttempts").textContent = state.attempts;
+      $("#resultIdentity").textContent = `${state.student}${state.studentClass ? ` • Turma ${state.studentClass}` : ""}`;
+      playSound("finish");
+      confetti(90);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function returnToStart(askConfirmation = true) {
+      if (askConfirmation && elements.gameScreen.classList.contains("active")) {
+        const confirmed = window.confirm("Deseja reiniciar a atividade? O progresso atual será apagado.");
+        if (!confirmed) return;
+      }
+      state.current = 0;
+      state.attempts = 1;
+      state.locked = false;
+      elements.failureOverlay.classList.remove("show");
+      elements.gameScreen.classList.remove("active");
+      elements.resultScreen.classList.remove("active");
+      elements.startScreen.classList.add("active");
+      elements.studentName.focus();
+    }
+
+    /* Insere acentos exatamente no campo que o aluno está preenchendo. */
+    function insertCharacter(character) {
+      const input = state.activeInput || answerInputs.find(item => !item.disabled) || answerInputs[0];
+      if (input.disabled) return;
+      const start = input.selectionStart ?? input.value.length;
+      const end = input.selectionEnd ?? start;
+      input.value = input.value.slice(0, start) + character + input.value.slice(end);
+      input.focus();
+      input.setSelectionRange(start + character.length, start + character.length);
+    }
+
+    let audioContext;
+    function playSound(type) {
+      if (!state.sound) return;
+      try {
+        audioContext = audioContext || new (window.AudioContext || window.webkitAudioContext)();
+        const sequences = {
+          start: [[392, 0], [523, .1]],
+          success: [[523, 0], [659, .1], [784, .2]],
+          error: [[210, 0], [150, .13]],
+          finish: [[523, 0], [659, .11], [784, .22], [1046, .36]]
+        };
+        sequences[type].forEach(([frequency, delay]) => {
+          const oscillator = audioContext.createOscillator();
+          const gain = audioContext.createGain();
+          oscillator.frequency.value = frequency;
+          gain.gain.setValueAtTime(.0001, audioContext.currentTime + delay);
+          gain.gain.exponentialRampToValueAtTime(.1, audioContext.currentTime + delay + .015);
+          gain.gain.exponentialRampToValueAtTime(.0001, audioContext.currentTime + delay + .17);
+          oscillator.connect(gain).connect(audioContext.destination);
+          oscillator.start(audioContext.currentTime + delay);
+          oscillator.stop(audioContext.currentTime + delay + .19);
+        });
+      } catch (_) { /* O jogo continua normalmente quando o áudio é bloqueado. */ }
+    }
+
+    function confetti(amount) {
+      const colors = ["#2b90ca", "#39a85a", "#f2a33a", "#df3d4d", "#7c4dcc", "#ffd84a"];
+      for (let i = 0; i < amount; i += 1) {
+        const piece = document.createElement("span");
+        piece.className = "confetti";
+        piece.style.left = `${Math.random() * 100}vw`;
+        piece.style.background = colors[i % colors.length];
+        piece.style.setProperty("--time", `${2.2 + Math.random() * 2.2}s`);
+        piece.style.setProperty("--drift", `${-140 + Math.random() * 280}px`);
+        piece.style.animationDelay = `${Math.random() * .4}s`;
+        document.body.appendChild(piece);
+        window.setTimeout(() => piece.remove(), 5000);
+      }
+    }
+
+    $("#startButton").addEventListener("click", startGame);
+    elements.checkButton.addEventListener("click", verifyConjugation);
+    elements.nextButton.addEventListener("click", nextVerb);
+    $("#restartButton").addEventListener("click", () => returnToStart(true));
+    $("#playAgainButton").addEventListener("click", () => returnToStart(false));
+    $("#printButton").addEventListener("click", () => window.print());
+
+    elements.soundButton.addEventListener("click", () => {
+      state.sound = !state.sound;
+      elements.soundButton.textContent = state.sound ? "🔊" : "🔇";
+      elements.soundButton.setAttribute("aria-label", state.sound ? "Desativar som" : "Ativar som");
+      if (state.sound) playSound("start");
+    });
+
+    answerInputs.forEach((input, index) => {
+      input.addEventListener("focus", () => { state.activeInput = input; });
+      input.addEventListener("keydown", event => {
+        if (event.key !== "Enter") return;
+        event.preventDefault();
+        if (index < answerInputs.length - 1) answerInputs[index + 1].focus();
+        else verifyConjugation();
+      });
+    });
+
+    $$(".accent-key").forEach(button => {
+      button.addEventListener("click", () => insertCharacter(button.dataset.char));
+    });
+
+    [elements.studentName, elements.studentClass].forEach(input => {
+      input.addEventListener("keydown", event => {
+        if (event.key === "Enter") startGame();
+      });
+    });
+  </script>
+</body>
+</html>
